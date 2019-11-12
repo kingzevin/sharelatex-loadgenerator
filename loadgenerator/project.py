@@ -7,7 +7,6 @@ import string
 import uuid
 import json
 from . import ROOT_PATH, csrf, randomwords
-from gevent.hub import ConcurrentObjectUseError
 from locust import TaskSet, task
 
 class Websocket():
@@ -21,17 +20,29 @@ class Websocket():
 
         self.c.on("otUpdateApplied", self.update_version)
         self.c.emit("joinProject", [{"project_id": project_id}], id=1)
-        with gevent.Timeout(20, False):
+        with gevent.Timeout(30, False):
             m = self.c.recv()
+            print("ARGS",m["args"],"ARGS")
+            while len(m["args"]) == 0:
+                m = self.c.recv()
+                print("ARGS{",m["args"],"}ARGS")
+            print("GOOD NEWS! OUT!")
             self.root_folder =  m["args"][1]["rootFolder"][0]
             self.main_tex = m["args"][1]["rootDoc_id"]
             self.c.emit("joinDoc", [self.main_tex], id=2)
             old_doc = self.c.recv()
+            # print("old_doc{",old_doc["args"],"}old_doc")
+            while len(old_doc["args"]) == 0:
+                old_doc = self.c.recv()
+                # print("ARGS{",old_doc["args"],"}ARGS")
             self.doc_text = "\n".join(old_doc["args"][1])
             self.doc_version = old_doc["args"][2]
+            print("doc_version{")
+            print(self.doc_version)
+            print("doc_version}")
             self.c.emit("clientTracking.getConnectedUsers", [], id=3)
             self.c.recv()
-        assert self.doc_version is not None
+        assert hasattr(self, "doc_version")
 
     def recv(self): self.c.recv()
 
@@ -61,7 +72,7 @@ def template(path):
         return string.Template(f.read())
 
 def chat(l):
-    msg = "".join( [random.choice(string.letters) for i in xrange(30)] )
+    msg = "".join( [random.choice(string.letters) for i in range(30)] )
     p = dict(_csrf=l.csrf_token, content=msg)
     l.client.post("/project/%s/messages" % l.project_id, params=p, name="/project/[id]/messages")
 
@@ -115,9 +126,11 @@ def compile(l):
 
 def find_user_id(doc):
     # window.csrfToken = "DwSsXuVc-uECsSv6dW5ifI4025HacsODuhb8"
-    user = re.search('window.user = ({[^;]+);', doc, re.IGNORECASE)
+    # print("doc[:\n", doc.decode("utf-8"), "\n]doc")
+    user = re.search('"user":{"id":"([^"]+)', doc.decode("utf-8") , re.IGNORECASE)
+    # user = re.search('window.user = ({[^;]+);', doc.decode("utf-8") , re.IGNORECASE)
     assert user, "No user found in response"
-    return json.loads(user.group(1))["id"]
+    return user.group(1)
 
 class Page(TaskSet):
     tasks = { stop: 1, chat: 2, edit_document: 2, file_upload: 2, show_history: 2, file_upload: 2, compile: 2, share_project: 1, spell_check: 0}
@@ -135,7 +148,7 @@ class Page(TaskSet):
             try:
                 while True:
                     self.websocket.recv()
-            except ConcurrentObjectUseError:
+            except gevent.socket.error:
                 print("websocket closed")
         gevent.spawn(_receive)
 

@@ -23,7 +23,7 @@ from loadgenerator import project, csrf
 import metrics
 import logparser
 
-host = os.environ.get("LOCUST_STATSD_HOST", "localhost")
+host = os.environ.get("LOCUST_STATSD_HOST", "172.17.0.7")
 port = os.environ.get("LOCUST_STATSD_PORT", "8125")
 STATSD = statsd.StatsClient(host, port, prefix='loadgenerator')
 METRICS_EXPORT_PATH     = os.environ.get("LOCUST_METRICS_EXPORT", "measurements")
@@ -31,7 +31,7 @@ MEASUREMENT_NAME        = os.environ.get("LOCUST_MEASUREMENT_NAME", "measurement
 MEASUREMENT_DESCRIPTION = os.environ.get("LOCUST_MEASUREMENT_DESCRIPTION", "linear increase")
 DURATION                = int(os.environ.get("LOCUST_DURATION", "20"))
 print(DURATION)
-USERS                   = int(os.environ.get("LOCUST_USERS", '10'))
+USERS                   = int(os.environ.get("LOCUST_USERS", '2'))
 HATCH_RATE              = float(os.environ.get("LOCUST_HATCH_RATE", "1"))
 LOAD_TYPE               = os.environ.get("LOCUST_LOAD_TYPE", "constant") # linear, constant, random, nasa, worldcup
 SPAWN_WAIT_MEAN         = int(os.environ.get("LOCUST_SPAWN_WAIT_MEAN", "10"))
@@ -84,7 +84,8 @@ class ProjectOverview(TaskSet):
     tasks = { project.Page: 30, create_delete_project: 2, stop: 1, settings: 1 }
     def on_start(self):
         r = self.client.get("/project")
-        projects = re.search("projects: (\\[.*\\])", r.content, re.MULTILINE).group(1)
+        projects = re.search("\"projects\":(\\[[^\\]]*\\])", r.content.decode("utf-8") , re.MULTILINE)
+        projects = re.search("\"projects\":(\\[[^\\]]*\\])", r.content.decode("utf-8") , re.MULTILINE).group(1)
         self.projects = json.loads(projects)
         assert len(self.projects) > 0, "No project founds create some!"
         self.csrf_token = csrf.find_in_page(r.content)
@@ -121,13 +122,13 @@ class RequestStats():
         STATSD.timing(request_type + "-" + name, response_time)
         if not request_type.startswith("WebSocket"):
             print("%s - %s: %s" % (request_type, name, response_time))
-	    STATSD.timing("requests_success", response_time)
+        STATSD.timing("requests_success", response_time)
 
     def requests_failure(self, request_type="", name="", response_time=0, exception=None, **kw):
         STATSD.timing(request_type + "-" + name + "-error", response_time)
         if not request_type.startswith("WebSocket"):
             print("%s - %s: %s" % (request_type, name, response_time))
-	    STATSD.timing("requests_failure", response_time)
+        STATSD.timing("requests_failure", response_time)
 
     def locust_error(self, locust_instance=None, exception=None, tb=None):
         STATSD.incr(locust_instance.__class__.__name__ + "-" + exception.__class__.__name__)
@@ -165,18 +166,18 @@ def process_requests(self):
     i = self.locust.request_number
     timestamps = self.locust.request_timestamps
     if i < timestamps.size:
-	delta = (timestamps.iloc[i] - timestamps.iloc[i - 1]) / np.timedelta64(1, 's')
-	print("client %s waits or %s" % (self.locust.client_id, delta))
-	gevent.sleep(delta)
-	self.locust.request_number += 1
+        delta = (timestamps.iloc[i] - timestamps.iloc[i - 1]) / np.timedelta64(1, 's')
+        print("client %s waits or %s" % (self.locust.client_id, delta))
+        gevent.sleep(delta)
+        self.locust.request_number += 1
     else:
         try:
-	    idx, timestamps = self.locust.client_queue.get(timeout=1)
+            idx, timestamps = self.locust.client_queue.get(timeout=1)
             self.client_id = idx
-	    self.request_timestamps = timestamps
-	    self.request_number = 1
+            self.request_timestamps = timestamps
+            self.request_number = 1
         except Empty:
-	    raise StopLocust("stop this instance")
+            raise StopLocust("stop this instance")
 
 def report_users():
     while True:
@@ -215,7 +216,7 @@ def replay_log_measure(df):
             except gevent.GreenletExit:
                 pass
         try:
-	    queue.put((idx[1], timestamps), block=False)
+            queue.put((idx[1], timestamps), block=False)
         except Full:
             runner.locusts.spawn(start_locust, locust)
     stop_measure(real_started_at)
