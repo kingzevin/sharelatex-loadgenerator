@@ -34,6 +34,7 @@ print(DURATION)
 USERS                   = int(os.environ.get("LOCUST_USERS", '2'))
 HATCH_RATE              = float(os.environ.get("LOCUST_HATCH_RATE", "1"))
 LOAD_TYPE               = os.environ.get("LOCUST_LOAD_TYPE", "constant") # linear, constant, random, nasa, worldcup
+print(LOAD_TYPE)
 SPAWN_WAIT_MEAN         = int(os.environ.get("LOCUST_SPAWN_WAIT_MEAN", "10"))
 SPAWN_WAIT_STD          = int(os.environ.get("LOCUST_SPAWN_WAIT_STD", "4"))
 USER_MEAN               = int(os.environ.get("LOCUST_USER_MEAN", "40"))
@@ -304,8 +305,8 @@ def group_log_by_sessions(df):
     return with_session.groupby(by).apply(started_at)
 
 def measure():
-    RequestStats()
-    time.sleep(5)
+    RequestStats() # 初始化events.request_success, events.request_failure, events.locust_error
+    time.sleep(5) # 为什么?
     if LOAD_TYPE == "constant":
         start_hatch(USERS, HATCH_RATE)
         events.hatch_complete += constant_measure
