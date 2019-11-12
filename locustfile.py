@@ -35,11 +35,13 @@ METRICS_EXPORT_PATH     = os.environ.get("LOCUST_METRICS_EXPORT", "measurements"
 MEASUREMENT_NAME        = os.environ.get("LOCUST_MEASUREMENT_NAME", "measurement")
 MEASUREMENT_DESCRIPTION = os.environ.get("LOCUST_MEASUREMENT_DESCRIPTION", "linear increase")
 DURATION                = int(os.environ.get("LOCUST_DURATION", "20"))
-print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + DURATION)
+print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+print(DURATION)
 USERS                   = int(os.environ.get("LOCUST_USERS", '2'))
 HATCH_RATE              = float(os.environ.get("LOCUST_HATCH_RATE", "1"))
 LOAD_TYPE               = os.environ.get("LOCUST_LOAD_TYPE", "constant") # linear, constant, random, nasa, worldcup
-print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + LOAD_TYPE)
+print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+print(LOAD_TYPE)
 SPAWN_WAIT_MEAN         = int(os.environ.get("LOCUST_SPAWN_WAIT_MEAN", "10"))
 SPAWN_WAIT_STD          = int(os.environ.get("LOCUST_SPAWN_WAIT_STD", "4"))
 USER_MEAN               = int(os.environ.get("LOCUST_USER_MEAN", "40"))
@@ -105,7 +107,8 @@ class UserBehavior(TaskSet):
         global logins_per_acc
         user += 1.0 / logins_per_acc
         self.email = "user%d@higgsboson.tk" % (int(user) % 300)
-        print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + self.email)
+        print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+        print(self.email)
         login(self)
 
 class WebsiteUser(HttpLocust):
@@ -127,13 +130,15 @@ class RequestStats():
     def requests_success(self, request_type="", name="", response_time=0, **kw):
         STATSD.timing(request_type + "-" + name, response_time)
         if not request_type.startswith("WebSocket"):
-            print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + "%s - %s: %s" % (request_type, name, response_time))
+            print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+            print("%s - %s: %s" % (request_type, name, response_time))
         STATSD.timing("requests_success", response_time)
 
     def requests_failure(self, request_type="", name="", response_time=0, exception=None, **kw):
         STATSD.timing(request_type + "-" + name + "-error", response_time)
         if not request_type.startswith("WebSocket"):
-            print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + "%s - %s: %s" % (request_type, name, response_time))
+            print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+            print("%s - %s: %s" % (request_type, name, response_time))
         STATSD.timing("requests_failure", response_time)
 
     def locust_error(self, locust_instance=None, exception=None, tb=None):
@@ -163,17 +168,20 @@ def constant_measure(*args, **kw):
 def start_hatch(users, hatch_rate):
     payload = dict(locust_count=users, hatch_rate=hatch_rate)
     r = requests.post("http://localhost:8089/swarm", data=payload)
-    print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + r.text)
+    print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+    print(r.text)
 
 def print_color(text):
-    print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + "\x1B[31;40m%s\x1B[0m" % text)
+    print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+    print("\x1B[31;40m%s\x1B[0m" % text)
 
 def process_requests(self):
     i = self.locust.request_number
     timestamps = self.locust.request_timestamps
     if i < timestamps.size:
         delta = (timestamps.iloc[i] - timestamps.iloc[i - 1]) / np.timedelta64(1, 's')
-        print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + "client %s waits or %s" % (self.locust.client_id, delta))
+        print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+        print("client %s waits or %s" % (self.locust.client_id, delta))
         gevent.sleep(delta)
         self.locust.request_number += 1
     else:
@@ -191,7 +199,8 @@ def report_users():
             val = runners.locust_runner.user_count
             STATSD.set("website_users", val)
         except SystemError as e:
-            print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + "could not update `website_users` statsd counter: %s" % e)
+            print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+            print("could not update `website_users` statsd counter: %s" % e)
         gevent.sleep(2)
 
 GREENLETS = []
@@ -213,7 +222,8 @@ def replay_log_measure(df):
         timestamps = client.timestamp
         now = timestamps.iloc[0]
         gevent.sleep((now - started_at) / np.timedelta64(1, 's'))
-        print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + "sleep (%s - %s) %s" % (now, started_at, (now - started_at) / np.timedelta64(1, 's')))
+        print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+        print("sleep (%s - %s) %s" % (now, started_at, (now - started_at) / np.timedelta64(1, 's')))
         started_at = now
         def start_locust(_):
             try:
@@ -248,7 +258,8 @@ def random_measure():
         seconds = (datetime.utcnow() - started_at).seconds
         if seconds > DURATION:
             break
-        print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + "%d seconds left!" % (DURATION - seconds))
+        print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+        print("%d seconds left!" % (DURATION - seconds))
         new_user = -1
         while new_user < 0:
             new_user = int(random.normalvariate(USER_MEAN, USER_STD))
@@ -257,7 +268,8 @@ def random_measure():
         if new_user > len(runner.locusts):
             while new_user > len(runner.locusts):
                 runner.locusts.spawn(start_locust, locust)
-                print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + "spawn user: now: %d" % len(runner.locusts))
+                print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+                print("spawn user: now: %d" % len(runner.locusts))
                 time.sleep(1)
         elif new_user < len(runner.locusts):
             locusts = list([l for l in runner.locusts])
@@ -268,8 +280,10 @@ def random_measure():
                     try:
                         runner.locusts.killone(l)
                     except Exception as e:
-                        print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + "failed to kill locust: %s" % e)
-                    print("LINE:" + str(getframeinfo(currentframe()).lineno) + "," + "stop user: now: %d" % len(runner.locusts))
+                        print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+                        print("failed to kill locust: %s" % e)
+                        print "LINE:" + str(getframeinfo(currentframe()).lineno) + ",", 
+                    print("stop user: now: %d" % len(runner.locusts))
         STATSD.gauge("user", len(runner.locusts))
         wait = random.normalvariate(SPAWN_WAIT_MEAN, SPAWN_WAIT_STD)
         print_color("cooldown for %f" % wait)
