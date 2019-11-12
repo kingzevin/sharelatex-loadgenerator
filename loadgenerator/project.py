@@ -13,7 +13,7 @@ from locust import TaskSet, task
 from inspect import currentframe, getframeinfo
 def LINE():
     print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
-    return "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno)
+    return "LINE:" + str(getframeinfo(currentframe()).filename) + ":" + str(getframeinfo(currentframe()).lineno)
 ##
 
 class Websocket():
