@@ -22,7 +22,6 @@ class Websocket():
         self.c.emit("joinProject", [{"project_id": project_id}], id=1)
         with gevent.Timeout(30, False):
             m = self.c.recv()
-            print("ARGS",m["args"],"ARGS")
             while len(m["args"]) == 0:
                 m = self.c.recv()
             self.root_folder =  m["args"][1]["rootFolder"][0]
@@ -35,9 +34,6 @@ class Websocket():
                 # print("ARGS{",old_doc["args"],"}ARGS")
             self.doc_text = "\n".join(old_doc["args"][1])
             self.doc_version = old_doc["args"][2]
-            print("doc_version{")
-            print(self.doc_version)
-            print("doc_version}")
             self.c.emit("clientTracking.getConnectedUsers", [], id=3)
             self.c.recv()
         assert hasattr(self, "doc_version")
