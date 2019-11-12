@@ -58,9 +58,9 @@ def wait(self):
     gevent.sleep(random.normalvariate(WAIT_MEAN, WAIT_STD))
 TaskSet.wait = wait
 
-def login(l):
+def login(l): # login(userbehavior)
     print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
-    resp = l.client.get("/login")
+    resp = l.client.get("/login") # userbehavior.client.get -> WebsiteUser.client.get
     l.csrf_token = csrf.find_in_page(resp.content)
     data = {
         "_csrf": l.csrf_token,
@@ -109,7 +109,7 @@ class ProjectOverview(TaskSet):
 
 user = 1
 logins_per_acc = 2
-class UserBehavior(TaskSet):
+class UserBehavior(TaskSet): # parent = WebsiteUser
     tasks = {ProjectOverview: 10, register: 1, index: 1}
     def on_start(self):
         print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
@@ -130,7 +130,9 @@ class WebsiteUser(HttpLocust):
             self.client_queue = queue
             super(WebsiteUser, self).__init__()
     task_set = UserBehavior
-
+    # task_set_instance = self.task_set(WebsiteUser)
+    # task_set_instance = UserBehavior(WebsiteUser)
+    
 class RequestStats():
     def __init__(self):
         events.request_success += self.requests_success
@@ -218,7 +220,7 @@ def report_users():
 
 GREENLETS = []
 def replay_log_measure(df):
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
+    
     TaskSet.wait = process_requests
     runner = runners.locust_runner
     locust = runner.locust_classes[0]
@@ -239,6 +241,7 @@ def replay_log_measure(df):
         print "LINE:" + str(getframeinfo(currentframe()).filename) + ":" + str(getframeinfo(currentframe()).lineno) + "," + str("sleep (%s - %s) %s" % (now, started_at, (now - started_at) / np.timedelta64(1, 's')))
         started_at = now
         def start_locust(_):
+            print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
             try:
                 l = WebsiteUser(idx[1], timestamps, queue)
                 l.run()
