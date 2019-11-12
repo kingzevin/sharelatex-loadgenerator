@@ -25,8 +25,6 @@ class Websocket():
             print("ARGS",m["args"],"ARGS")
             while len(m["args"]) == 0:
                 m = self.c.recv()
-                print("ARGS{",m["args"],"}ARGS")
-            print("GOOD NEWS! OUT!")
             self.root_folder =  m["args"][1]["rootFolder"][0]
             self.main_tex = m["args"][1]["rootDoc_id"]
             self.c.emit("joinDoc", [self.main_tex], id=2)
