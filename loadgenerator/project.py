@@ -9,6 +9,13 @@ import json
 from . import ROOT_PATH, csrf, randomwords
 from locust import TaskSet, task
 
+## zevin
+from inspect import currentframe, getframeinfo
+def LINE():
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
+    return "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno)
+##
+
 class Websocket():
     def __init__(self, locust, project_id):
         self.c = socketio.Client(locust)
@@ -41,6 +48,7 @@ class Websocket():
     def recv(self): self.c.recv()
 
     def update_version(self, args):
+        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
         self.doc_version = args[0]["v"] + 1
         if self.pending_text is not None:
             self.doc_text = self.pending_text
@@ -50,6 +58,7 @@ class Websocket():
         pass
 
     def update_document(self, new_text):
+        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
         update = [ self.main_tex,
                   {"doc": self.main_tex,
                    "op": [{"d": self.doc_text, "p":0},
@@ -62,33 +71,40 @@ class Websocket():
         self.c.close()
 
 def template(path):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     with open(os.path.join(ROOT_PATH, path), "r") as f:
         return string.Template(f.read())
 
 def chat(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     msg = "".join( [random.choice(string.letters) for i in range(30)] )
     p = dict(_csrf=l.csrf_token, content=msg)
     l.client.post("/project/%s/messages" % l.project_id, params=p, name="/project/[id]/messages")
 
 DOCUMENT_TEMPLATE = template("document.tex")
 def edit_document(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     params = dict(paragraph=random.randint(0, 1000))
     doc = DOCUMENT_TEMPLATE.safe_substitute(params)
     l.websocket.update_document(doc)
 
 def stop(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     l.interrupt()
 
 def share_project(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     l.client.get("/user/contacts")
     p = dict(_csrf=l.csrf_token, email="joerg.2@higgsboson.tk", privileges="readAndWrite")
     l.client.post("/project/%s/users" % l.project_id, data=p, name="/project/[id]/users")
 
 def spell_check(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     data = dict(language="en", _csrf=l.csrf_token, words=randomwords.sample(1, 1), token=l.user_id)
     r = l.client.post("/spelling/check", json=data)
 
 def file_upload(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     path = os.path.join(ROOT_PATH, "tech-support.jpg")
     p = dict(folder_id=l.websocket.root_folder['_id'],
              _csrf=l.csrf_token,
@@ -98,11 +114,13 @@ def file_upload(l):
     resp = l.client.post("/project/%s/upload" % l.project_id, params=p, files=files, name="/project/[id]/upload")
 
 def show_history(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     l.client.get("/project/%s/updates" % l.project_id, params={"min_count": 10}, name="/project/[id]/updates")
     u =  "/project/%s/doc/%s/diff" % (l.project_id, l.websocket.root_folder['_id'])
     l.client.get(u, params={'from':1, 'to':2}, name="/project/[id]/doc/[id]/diff")
 
 def compile(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     d = {"rootDoc_id": l.websocket.root_folder['_id'] ,"draft": False,"_csrf": l.csrf_token}
     r1 = l.client.post("/project/%s/compile" % l.project_id,
                        json=d,
@@ -119,6 +137,7 @@ def compile(l):
             name="/project/[id]/output/output.pdf")
 
 def find_user_id(doc):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     # window.csrfToken = "DwSsXuVc-uECsSv6dW5ifI4025HacsODuhb8"
     # print("doc[:\n", doc.decode("utf-8"), "\n]doc")
     user = re.search('"user":{"id":"([^"]+)', doc.decode("utf-8") , re.IGNORECASE)
@@ -129,6 +148,7 @@ def find_user_id(doc):
 class Page(TaskSet):
     tasks = { stop: 1, chat: 2, edit_document: 2, file_upload: 2, show_history: 2, file_upload: 2, compile: 2, share_project: 1, spell_check: 0}
     def on_start(self):
+        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
         projects = self.parent.projects
         assert len(projects) > 0
         self.project_id = random.choice(projects)['id']
@@ -147,5 +167,6 @@ class Page(TaskSet):
         gevent.spawn(_receive)
 
     def interrupt(self,reschedule=True):
+        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
         self.websocket.close()
         super(Page, self).interrupt(reschedule=reschedule)

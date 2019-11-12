@@ -26,7 +26,8 @@ import logparser
 ## zevin
 from inspect import currentframe, getframeinfo
 def LINE():
-    return "LINE:" + str(getframeinfo(currentframe()).lineno)
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
+    return "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno)
 ##
 host = os.environ.get("LOCUST_STATSD_HOST", "172.17.0.7")
 port = os.environ.get("LOCUST_STATSD_PORT", "8125")
@@ -35,11 +36,11 @@ METRICS_EXPORT_PATH     = os.environ.get("LOCUST_METRICS_EXPORT", "measurements"
 MEASUREMENT_NAME        = os.environ.get("LOCUST_MEASUREMENT_NAME", "measurement")
 MEASUREMENT_DESCRIPTION = os.environ.get("LOCUST_MEASUREMENT_DESCRIPTION", "linear increase")
 DURATION                = int(os.environ.get("LOCUST_DURATION", "20"))
-print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str(DURATION)
+print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str(DURATION)
 USERS                   = int(os.environ.get("LOCUST_USERS", '2'))
 HATCH_RATE              = float(os.environ.get("LOCUST_HATCH_RATE", "1"))
 LOAD_TYPE               = os.environ.get("LOCUST_LOAD_TYPE", "constant") # linear, constant, random, nasa, worldcup
-print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str(LOAD_TYPE)
+print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str(LOAD_TYPE)
 SPAWN_WAIT_MEAN         = int(os.environ.get("LOCUST_SPAWN_WAIT_MEAN", "10"))
 SPAWN_WAIT_STD          = int(os.environ.get("LOCUST_SPAWN_WAIT_STD", "4"))
 USER_MEAN               = int(os.environ.get("LOCUST_USER_MEAN", "40"))
@@ -51,10 +52,12 @@ TIMESTAMP_STOP          = os.environ.get("LOCUST_TIMESTAMP_STOP", '1998-06-02 09
 WEB_LOGS_PATH           = os.environ.get("LOCUST_LOG_PATH", "logs") # path to nasa/worldcup logs
 
 def wait(self):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     gevent.sleep(random.normalvariate(WAIT_MEAN, WAIT_STD))
 TaskSet.wait = wait
 
 def login(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     resp = l.client.get("/login")
     l.csrf_token = csrf.find_in_page(resp.content)
     data = {
@@ -66,6 +69,7 @@ def login(l):
     assert r.json().get("redir", None) == "/project"
 
 def create_delete_project(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     d = {"_csrf": l.csrf_token, "projectName": "123", "template": None}
     r = l.client.post("/project/new", json=d)
     l.client.delete("/project/%s" % r.json()["project_id"],
@@ -73,17 +77,21 @@ def create_delete_project(l):
                     name = "/project/[id]")
 
 def settings(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     l.client.get("/user/settings")
     d = dict(_csrf=l.csrf_token, email=l.parent.email, first_name="foo", last_name="bar")
     assert l.client.post("/user/settings", json=d).text == "OK"
 
 def stop(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     l.interrupt()
 
 def register(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     l.client.get("/register")
 
 def index(l):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     l.client.get("/")
 
 class ProjectOverview(TaskSet):
@@ -101,16 +109,18 @@ logins_per_acc = 2
 class UserBehavior(TaskSet):
     tasks = {ProjectOverview: 10, register: 1, index: 1}
     def on_start(self):
+        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
         global user
         global logins_per_acc
         user += 1.0 / logins_per_acc
         self.email = "user%d@higgsboson.tk" % (int(user) % 300)
-        print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str(self.email)
+        print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str(self.email)
         login(self)
 
 class WebsiteUser(HttpLocust):
     if LOAD_TYPE == "nasa" or LOAD_TYPE == "worldcup":
         def __init__(self, client_id, timestamps, queue):
+            print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
             self.request_timestamps = timestamps
             self.request_number = 1
             self.client_id = client_id
@@ -125,22 +135,26 @@ class RequestStats():
         events.locust_error    += self.locust_error
 
     def requests_success(self, request_type="", name="", response_time=0, **kw):
+        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
         STATSD.timing(request_type + "-" + name, response_time)
         if not request_type.startswith("WebSocket"):
-            print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str("%s - %s: %s" % (request_type, name, response_time))
+            print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str("%s - %s: %s" % (request_type, name, response_time))
         STATSD.timing("requests_success", response_time)
 
     def requests_failure(self, request_type="", name="", response_time=0, exception=None, **kw):
+        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
         STATSD.timing(request_type + "-" + name + "-error", response_time)
         if not request_type.startswith("WebSocket"):
-            print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str("%s - %s: %s" % (request_type, name, response_time))
+            print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str("%s - %s: %s" % (request_type, name, response_time))
         STATSD.timing("requests_failure", response_time)
 
     def locust_error(self, locust_instance=None, exception=None, tb=None):
+        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
         STATSD.incr(locust_instance.__class__.__name__ + "-" + exception.__class__.__name__)
         STATSD.incr("requests_error")
 
 def stop_measure(started_at):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     ended_at = datetime.utcnow()
     metadata = {}
     for k, v in os.environ.items():
@@ -154,6 +168,7 @@ def stop_measure(started_at):
     os.kill(os.getpid(), signal.SIGINT)
 
 def constant_measure(*args, **kw):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     # wait for the load generator to take effect
     time.sleep(10)
     started_at = datetime.utcnow()
@@ -161,19 +176,22 @@ def constant_measure(*args, **kw):
     stop_measure(started_at)
 
 def start_hatch(users, hatch_rate):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     payload = dict(locust_count=users, hatch_rate=hatch_rate)
     r = requests.post("http://localhost:8089/swarm", data=payload)
-    print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str(r.text)
+    print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str(r.text)
 
 def print_color(text):
-    print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str("\x1B[31;40m%s\x1B[0m" % text)
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
+    print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str("\x1B[31;40m%s\x1B[0m" % text)
 
 def process_requests(self):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     i = self.locust.request_number
     timestamps = self.locust.request_timestamps
     if i < timestamps.size:
         delta = (timestamps.iloc[i] - timestamps.iloc[i - 1]) / np.timedelta64(1, 's')
-        print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str("client %s waits or %s" % (self.locust.client_id, delta))
+        print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str("client %s waits or %s" % (self.locust.client_id, delta))
         gevent.sleep(delta)
         self.locust.request_number += 1
     else:
@@ -186,16 +204,18 @@ def process_requests(self):
             raise StopLocust("stop this instance")
 
 def report_users():
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     while True:
         try:
             val = runners.locust_runner.user_count
             STATSD.set("website_users", val)
         except SystemError as e:
-            print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str("could not update `website_users` statsd counter: %s" % e)
+            print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str("could not update `website_users` statsd counter: %s" % e)
         gevent.sleep(2)
 
 GREENLETS = []
 def replay_log_measure(df):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     TaskSet.wait = process_requests
     runner = runners.locust_runner
     locust = runner.locust_classes[0]
@@ -213,7 +233,7 @@ def replay_log_measure(df):
         timestamps = client.timestamp
         now = timestamps.iloc[0]
         gevent.sleep((now - started_at) / np.timedelta64(1, 's'))
-        print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str("sleep (%s - %s) %s" % (now, started_at, (now - started_at) / np.timedelta64(1, 's')))
+        print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str("sleep (%s - %s) %s" % (now, started_at, (now - started_at) / np.timedelta64(1, 's')))
         started_at = now
         def start_locust(_):
             try:
@@ -228,6 +248,7 @@ def replay_log_measure(df):
     stop_measure(real_started_at)
 
 def random_measure():
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     runner = runners.locust_runner
     locust = runner.locust_classes[0]
     def start_locust(_):
@@ -248,7 +269,7 @@ def random_measure():
         seconds = (datetime.utcnow() - started_at).seconds
         if seconds > DURATION:
             break
-        print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str("%d seconds left!" % (DURATION - seconds))
+        print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str("%d seconds left!" % (DURATION - seconds))
         new_user = -1
         while new_user < 0:
             new_user = int(random.normalvariate(USER_MEAN, USER_STD))
@@ -257,7 +278,7 @@ def random_measure():
         if new_user > len(runner.locusts):
             while new_user > len(runner.locusts):
                 runner.locusts.spawn(start_locust, locust)
-                print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str("spawn user: now: %d" % len(runner.locusts))
+                print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str("spawn user: now: %d" % len(runner.locusts))
                 time.sleep(1)
         elif new_user < len(runner.locusts):
             locusts = list([l for l in runner.locusts])
@@ -268,8 +289,8 @@ def random_measure():
                     try:
                         runner.locusts.killone(l)
                     except Exception as e:
-                        print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str("failed to kill locust: %s" % e)
-                    print "LINE:" + str(getframeinfo(currentframe()).lineno) + "," + str("stop user: now: %d" % len(runner.locusts))
+                        print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str("failed to kill locust: %s" % e)
+                    print "LINE:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).lineno) + "," + str("stop user: now: %d" % len(runner.locusts))
         STATSD.gauge("user", len(runner.locusts))
         wait = random.normalvariate(SPAWN_WAIT_MEAN, SPAWN_WAIT_STD)
         print_color("cooldown for %f" % wait)
@@ -277,6 +298,7 @@ def random_measure():
     stop_measure(started_at)
 
 def read_log(type):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     if type == "nasa":
         read_log = logparser.read_nasa
     else: # "worldcup"
@@ -290,6 +312,7 @@ def read_log(type):
     return df[filter]
 
 def session_number(v):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     diff = v.timestamp.diff(1)
     diff.fillna(0, inplace=True)
     sessions = (diff > pd.Timedelta(minutes=10)).cumsum()
@@ -298,11 +321,13 @@ def session_number(v):
     return pd.DataFrame(data)
 
 def started_at(v):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     data = dict(client_id=v.client_id, timestamp=v.timestamp, session_id=v.session_id,
                 started_at=[v.timestamp.iloc[0]] * len(v.timestamp))
     return pd.DataFrame(data)
 
 def group_log_by_sessions(df):
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     df = df.sort_values("timestamp")
     per_client = df.groupby(df.client_id, sort=False)
     with_session = per_client.apply(session_number)
@@ -310,6 +335,7 @@ def group_log_by_sessions(df):
     return with_session.groupby(by).apply(started_at)
 
 def measure():
+    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function)
     RequestStats() # 初始化events.request_success, events.request_failure, events.locust_error
     time.sleep(5) # 为什么?
     if LOAD_TYPE == "constant":
