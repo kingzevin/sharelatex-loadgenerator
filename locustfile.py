@@ -96,7 +96,7 @@ def index(l):
     print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
     l.client.get("/")
 
-class ProjectOverview(TaskSet):
+class ProjectOverview(TaskSet): # 怎么执行到这的
     tasks = { project.Page: 30, create_delete_project: 2, stop: 1, settings: 1 }
     def on_start(self):
         print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
@@ -110,7 +110,7 @@ class ProjectOverview(TaskSet):
 user = 1
 logins_per_acc = 2
 class UserBehavior(TaskSet): # parent = WebsiteUser
-    tasks = {ProjectOverview: 10, register: 1, index: 1}
+    tasks = {ProjectOverview: 10, register: 1, index: 1, stop:100}
     def on_start(self):
         print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
         global user
@@ -140,7 +140,7 @@ class RequestStats():
         events.locust_error    += self.locust_error
 
     def requests_success(self, request_type="", name="", response_time=0, **kw):
-        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
+        # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
         STATSD.timing(request_type + "-" + name, response_time)
         if not request_type.startswith("WebSocket"):
             print "LINE:" + str(getframeinfo(currentframe()).filename) + ":" + str(getframeinfo(currentframe()).lineno) + "," + str("%s - %s: %s" % (request_type, name, response_time))
