@@ -68,7 +68,7 @@ def login(l): # login(userbehavior)
         "password": "password"
     }
     r = l.client.post("/login", data)
-    assert r.json().get("redir", None) == "/project"
+    # assert r.json().get("redir", None) == "/project"
 
 def create_delete_project(l):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
