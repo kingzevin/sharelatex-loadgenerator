@@ -103,7 +103,7 @@ def share_project(l):
 def spell_check(l, toCheck):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     data = dict(language="en", _csrf=l.csrf_token, words=[toCheck], token=str(l.user_id))
-    r = l.client.post("/spelling/check", json=data, name="/spelling/check" + str(data))
+    r = l.client.post("/spelling/check", json=data, name="/spelling/check")
 
 def file_upload(l):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
