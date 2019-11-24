@@ -97,7 +97,7 @@ def share_project(l):
     print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     l.client.get("/user/contacts")
     p = dict(_csrf=l.csrf_token, email="joerg.2@higgsboson.tk", privileges="readAndWrite")
-    l.client.post("/project/%s/users" % l.project_id, data=p, name="/project/[id]/users")
+    l.client.post("/project/%s/invite" % l.project_id, data=p, name="/project/[id]/users")
 
 def spell_check(l):
     print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
