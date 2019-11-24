@@ -102,7 +102,7 @@ def share_project(l):
 
 def spell_check(l, toCheck):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
-    data = dict(language="en", _csrf=l.csrf_token, words=toCheck, token=l.user_id)
+    data = dict(language="en", _csrf=l.csrf_token, words=toCheck, token=str(l.user_id))
     r = l.client.post("/spelling/check", json=data, name="/spelling/check" + str(data))
 
 def file_upload(l):
@@ -134,7 +134,10 @@ def compile(l):
     l.client.get("/project/%s/output/output.log" % l.project_id,
             params={"build": files[0]["build"]},
             name="/project/[id]/output/output.log?build=[id]")
-    pdfUrl = [x for x in files if x["path"] == "output.pdf"][0]["url"]
+    pdfUrl = [x for x in files if x["path"] == "output.pdf"]
+    if len(pdfUrl) == 0:
+        return
+    pdfUrl=pdfUrl[0]["url"]
     l.client.get(pdfUrl,
             params={ "compileGroup": "standard", "pdfng": True},
             name="/project/[id]/output/output.pdf")

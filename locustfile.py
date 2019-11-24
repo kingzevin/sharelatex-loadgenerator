@@ -140,7 +140,7 @@ class RequestStats():
         events.locust_error    += self.locust_error
 
     def requests_success(self, request_type="", name="", response_time=0, **kw):
-        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
+        # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
         STATSD.timing(request_type + "-" + name, response_time)
         if not request_type.startswith("WebSocket"):
             print "LINE:" + str(getframeinfo(currentframe()).filename) + ":" + str(getframeinfo(currentframe()).lineno) + "," + str("%s - %s: %s" % (request_type, name, response_time))
