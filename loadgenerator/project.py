@@ -88,6 +88,7 @@ def edit_document(l):
     params = dict(paragraph=random.randint(0, 1000))
     doc = DOCUMENT_TEMPLATE.safe_substitute(params)
     l.websocket.update_document(doc)
+    spell_check(l)
 
 def stop(l):
     print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
@@ -116,9 +117,9 @@ def file_upload(l):
 
 def show_history(l):
     print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
-    l.client.get("/project/%s/updates" % l.project_id, params={"min_count": 10}, name="/project/[id]/updates")
-    u =  "/project/%s/doc/%s/diff" % (l.project_id, l.websocket.root_folder['_id'])
-    l.client.get(u, params={'from':1, 'to':2}, name="/project/[id]/doc/[id]/diff")
+    l.client.get("/project/%s/updates?min_count=10" % l.project_id, name="/project/[id]/updates")
+    u =  "/project/%s/doc/%s/diff?from=1&to=2" % (l.project_id, l.websocket.root_folder['_id'])
+    l.client.get(u, name="/project/[id]/doc/[id]/diff")
 
 def compile(l):
     print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
@@ -137,6 +138,12 @@ def compile(l):
             params={"build": files[4]["build"], "compileGroup": "standard", "pdfng": True},
             name="/project/[id]/output/output.pdf")
 
+def download_pdf(l):
+    l.client.get("project/%s/output/output.pdf?compileGroup=standard&popupDownload=true" % l.project_id)
+
+def clear_cache(l):
+    l.client.delete("project/%s/output" % l.project_id)
+
 def find_user_id(doc):
     print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     # window.csrfToken = "DwSsXuVc-uECsSv6dW5ifI4025HacsODuhb8"
@@ -147,7 +154,7 @@ def find_user_id(doc):
     return user.group(1)
 
 class Page(TaskSet): # 怎么执行到这的
-    tasks = { stop: 1, chat: 2, edit_document: 2, file_upload: 2, show_history: 2, file_upload: 2, compile: 2, share_project: 1, spell_check: 0}
+    tasks = { stop: 1, chat: 2, edit_document: 2, file_upload: 2, show_history: 2, compile: 2, share_project: 1}
     def on_start(self):
         print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
         projects = self.parent.projects
