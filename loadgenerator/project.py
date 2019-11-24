@@ -133,8 +133,8 @@ def compile(l):
     l.client.get("/project/%s/output/output.log" % l.project_id,
             params={"build": files[0]["build"]},
             name="/project/[id]/output/output.log?build=[id]")
-    l.client.get("/project/%s/output/output.pdf?compileGroup=standard&pdfng=true" % l.project_id,
-            params={"build": files[0]["build"], "compileGroup": "standard", "pdfng": True},
+    l.client.get("/project/%s/output/output.pdf" % l.project_id,
+            params={"build": files[4]["build"], "compileGroup": "standard", "pdfng": True},
             name="/project/[id]/output/output.pdf")
 
 def find_user_id(doc):
