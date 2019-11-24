@@ -104,6 +104,7 @@ class ProjectOverview(TaskSet): # 怎么执行到这的
         projects = re.search("\"projects\":(\\[[^\\]]*\\])", r.content.decode("utf-8") , re.MULTILINE)
         projects = re.search("\"projects\":(\\[[^\\]]*\\])", r.content.decode("utf-8") , re.MULTILINE).group(1)
         self.projects = json.loads(projects)
+	self.projects = [x for x in self.projects if x["archived"] == False]
         assert len(self.projects) > 0, "No project founds create some!"
         self.csrf_token = csrf.find_in_page(r.content)
 
