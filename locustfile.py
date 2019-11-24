@@ -72,7 +72,7 @@ def login(l): # login(userbehavior)
 
 def create_delete_project(l):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
-    d = {"_csrf": l.csrf_token, "projectName": "123", "template": None}
+    d = {"_csrf": l.csrf_token, "projectName": "123", "template": "none"}
     r = l.client.post("/project/new", json=d)
     l.client.delete("/project/%s" % r.json()["project_id"],
                     params = {"_csrf": l.csrf_token},
