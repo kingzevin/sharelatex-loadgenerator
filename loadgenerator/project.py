@@ -82,13 +82,13 @@ def chat(l):
     p = dict(_csrf=l.csrf_token, content=msg)
     l.client.post("/project/%s/messages" % l.project_id, params=p, name="/project/[id]/messages")
 
-DOCUMENT_TEMPLATE = template("document.tex")
+DOCUMENT_TEMPLATE = template("none.tex")
 def edit_document(l):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
-    params = dict(paragraph=random.randint(0, 1000))
+    params = dict(test=randomwords.sample(1, 1)[0])
     doc = DOCUMENT_TEMPLATE.safe_substitute(params)
     l.websocket.update_document(doc)
-    spell_check(l)
+    spell_check(l, params["test"])
 
 def stop(l):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
@@ -100,9 +100,9 @@ def share_project(l):
     p = dict(_csrf=l.csrf_token, email="joerg.2@higgsboson.tk", privileges="readAndWrite")
     l.client.post("/project/%s/invite" % l.project_id, data=p, name="/project/[id]/users")
 
-def spell_check(l):
+def spell_check(l, toCheck):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
-    data = dict(language="en", _csrf=l.csrf_token, words=randomwords.sample(1, 1), token=l.user_id)
+    data = dict(language="en", _csrf=l.csrf_token, words=toCheck, token=l.user_id)
     r = l.client.post("/spelling/check", json=data, name="/spelling/check" + str(data))
 
 def file_upload(l):
@@ -134,8 +134,9 @@ def compile(l):
     l.client.get("/project/%s/output/output.log" % l.project_id,
             params={"build": files[0]["build"]},
             name="/project/[id]/output/output.log?build=[id]")
-    l.client.get("/project/%s/output/output.pdf" % l.project_id,
-            params={"build": files[4]["build"], "compileGroup": "standard", "pdfng": True},
+    pdfUrl = [x for x in files if x["path"] == "output.pdf"][0]["url"]
+    l.client.get(pdfUrl,
+            params={ "compileGroup": "standard", "pdfng": True},
             name="/project/[id]/output/output.pdf")
 
 def download_pdf(l):
