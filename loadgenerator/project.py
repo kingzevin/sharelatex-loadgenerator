@@ -155,7 +155,7 @@ def find_user_id(doc):
     return user.group(1)
 
 class Page(TaskSet): # 怎么执行到这的
-    tasks = { stop: 1, chat: 2, edit_document: 2, file_upload: 2, show_history: 2, compile: 2, share_project: 1, clear_cache:10}
+    tasks = { stop: 1, chat: 2, edit_document: 5, file_upload: 1, show_history: 1, compile: 2, share_project: 1, clear_cache:1}
     def on_start(self):
         # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
         projects = self.parent.projects
