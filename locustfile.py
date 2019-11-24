@@ -97,7 +97,7 @@ def index(l):
     l.client.get("/")
 
 class ProjectOverview(TaskSet): # 怎么执行到这的
-    tasks = { project.Page: 30, create_delete_project: 2, stop: 100, settings: 1 }
+    tasks = { project.Page: 30, create_delete_project: 2, stop: 1, settings: 1 }
     def on_start(self):
         print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
         r = self.client.get("/project")
