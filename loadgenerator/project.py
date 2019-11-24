@@ -13,7 +13,7 @@ from locust import TaskSet, task
 ## zevin
 from inspect import currentframe, getframeinfo
 def LINE():
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+    # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     return "LINE:" + str(getframeinfo(currentframe()).filename) + ":" + str(getframeinfo(currentframe()).lineno)
 ##
 
@@ -49,7 +49,7 @@ class Websocket():
     def recv(self): self.c.recv()
 
     def update_version(self, args):
-        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+        # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
         self.doc_version = args[0]["v"] + 1
         if self.pending_text is not None:
             self.doc_text = self.pending_text
@@ -59,7 +59,7 @@ class Websocket():
         pass
 
     def update_document(self, new_text):
-        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+        # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
         update = [ self.main_tex,
                   {"doc": self.main_tex,
                    "op": [{"d": self.doc_text, "p":0},
@@ -72,41 +72,41 @@ class Websocket():
         self.c.close()
 
 def template(path):
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+    # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     with open(os.path.join(ROOT_PATH, path), "r") as f:
         return string.Template(f.read())
 
 def chat(l):
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+    # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     msg = "".join( [random.choice(string.letters) for i in range(30)] )
     p = dict(_csrf=l.csrf_token, content=msg)
     l.client.post("/project/%s/messages" % l.project_id, params=p, name="/project/[id]/messages")
 
 DOCUMENT_TEMPLATE = template("document.tex")
 def edit_document(l):
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+    # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     params = dict(paragraph=random.randint(0, 1000))
     doc = DOCUMENT_TEMPLATE.safe_substitute(params)
     l.websocket.update_document(doc)
     spell_check(l)
 
 def stop(l):
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+    # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     l.interrupt()
 
 def share_project(l):
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+    # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     l.client.get("/user/contacts")
     p = dict(_csrf=l.csrf_token, email="joerg.2@higgsboson.tk", privileges="readAndWrite")
     l.client.post("/project/%s/invite" % l.project_id, data=p, name="/project/[id]/users")
 
 def spell_check(l):
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+    # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     data = dict(language="en", _csrf=l.csrf_token, words=randomwords.sample(1, 1), token=l.user_id)
     r = l.client.post("/spelling/check", json=data)
 
 def file_upload(l):
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+    # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     path = os.path.join(ROOT_PATH, "tech-support.jpg")
     p = dict(folder_id=l.websocket.root_folder['_id'],
              _csrf=l.csrf_token,
@@ -116,13 +116,13 @@ def file_upload(l):
     resp = l.client.post("/project/%s/upload" % l.project_id, params=p, files=files, name="/project/[id]/upload")
 
 def show_history(l):
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+    # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     l.client.get("/project/%s/updates?min_count=10" % l.project_id, name="/project/[id]/updates")
     u =  "/project/%s/doc/%s/diff?from=1&to=2" % (l.project_id, l.websocket.root_folder['_id'])
     l.client.get(u, name="/project/[id]/doc/[id]/diff")
 
 def compile(l):
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+    # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     d = {"rootDoc_id": l.websocket.root_folder['_id'] ,"draft": False,"_csrf": l.csrf_token}
     r1 = l.client.post("/project/%s/compile" % l.project_id,
                        json=d,
@@ -145,7 +145,7 @@ def clear_cache(l):
     l.client.delete("project/%s/output" % l.project_id)
 
 def find_user_id(doc):
-    print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+    # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     # window.csrfToken = "DwSsXuVc-uECsSv6dW5ifI4025HacsODuhb8"
     # print("doc[:\n", doc.decode("utf-8"), "\n]doc")
     user = re.search('"user":{"id":"([^"]+)', doc.decode("utf-8") , re.IGNORECASE)
@@ -156,7 +156,7 @@ def find_user_id(doc):
 class Page(TaskSet): # 怎么执行到这的
     tasks = { stop: 1, chat: 2, edit_document: 2, file_upload: 2, show_history: 2, compile: 2, share_project: 1}
     def on_start(self):
-        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+        # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
         projects = self.parent.projects
         assert len(projects) > 0
         self.project_id = random.choice(projects)['id']
@@ -175,6 +175,6 @@ class Page(TaskSet): # 怎么执行到这的
         gevent.spawn(_receive)
 
     def interrupt(self,reschedule=True):
-        print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
+        # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
         self.websocket.close()
         super(Page, self).interrupt(reschedule=reschedule)
