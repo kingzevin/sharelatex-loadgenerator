@@ -2,14 +2,15 @@
 import socketio
 import gevent
 import random
-import os
+import os, sys
 import re
 import string
 import uuid
 import json
-from . import ROOT_PATH, csrf, randomwords, SPECIFIC_TASK
+from . import ROOT_PATH, csrf, randomwords
 from locust import TaskSet, task
-
+sys.path.append("..") # 这句是为了导入_config
+from locustfile import SPECIFIC_TASK
 ## zevin
 from inspect import currentframe, getframeinfo
 def LINE():
