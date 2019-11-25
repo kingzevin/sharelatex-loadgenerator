@@ -109,39 +109,14 @@ class ProjectOverview(TaskSet): # 怎么执行到这的
         projects = re.search("\"projects\":(\\[[^\\]]*\\])", r.content.decode("utf-8") , re.MULTILINE)
         projects = re.search("\"projects\":(\\[[^\\]]*\\])", r.content.decode("utf-8") , re.MULTILINE).group(1)
         self.projects = json.loads(projects)
-        if SPECIFIC_TASK != "":
-            if SPECIFIC_TASK == "CompileTask":
-                tasks = {project.CompileTask: 1}
-            elif SPECIFIC_TASK == "ChatTask":
-                tasks = {project.ChatTask: 1}
-            elif SPECIFIC_TASK == "Edit_DocumentTask":
-                tasks = {project.Edit_DocumentTask: 1}
-            elif SPECIFIC_TASK == "File_UploadTask":
-                tasks = {project.File_UploadTask: 1}
-            elif SPECIFIC_TASK == "Show_HistoryTask":
-                tasks = {project.Show_HistoryTask: 1}
-            elif SPECIFIC_TASK == "Share_ProjectTask":
-                tasks = {project.Share_ProjectTask: 1}
-            elif SPECIFIC_TASK == "Clear_CacheTask":
-                tasks = {project.Clear_CacheTask: 1}
-            elif SPECIFIC_TASK == "RegisterTask":
-                tasks = {register: 1}
-            elif SPECIFIC_TASK == "Password_ResetTask":
-                tasks = {password_reset: 1}
-            elif SPECIFIC_TASK == "IndexTask":
-                tasks = {index: 1}
-            elif SPECIFIC_TASK == "SettingsTask":
-                tasks = {settings: 1}
-            elif SPECIFIC_TASK == "Create_DeleteTask":
-                tasks = {create_delete_project: 1}
-	    self.projects = [x for x in self.projects if x["archived"] == False]
+        self.projects = [x for x in self.projects if x["archived"] == False]
         assert len(self.projects) > 0, "No project founds create some!"
         self.csrf_token = csrf.find_in_page(r.content)
 
 user = 1
 logins_per_acc = 2
 class UserBehavior(TaskSet): # parent = WebsiteUser
-    tasks = {ProjectOverview: 10, register: 1, index: 1}
+    tasks = {ProjectOverview: 10, register: 100, index: 1}
     def on_start(self):
         # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
         global user
@@ -162,6 +137,8 @@ class WebsiteUser(HttpLocust):
             self.client_queue = queue
             super(WebsiteUser, self).__init__()
     task_set = UserBehavior
+    if SPECIFIC_TASK != "":
+        UserBehavior.tasks = {ProjectOverview: 1}
     # task_set_instance = self.task_set(WebsiteUser)
     # task_set_instance = UserBehavior(WebsiteUser)
     
