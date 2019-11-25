@@ -165,8 +165,6 @@ class WebsiteUser(HttpLocust):
             self.client_queue = queue
             super(WebsiteUser, self).__init__()
     task_set = UserBehavior
-    if SPECIFIC_TASK != "":
-        UserBehavior.tasks = {ProjectOverview: 1}
     # task_set_instance = self.task_set(WebsiteUser)
     # task_set_instance = UserBehavior(WebsiteUser)
     
