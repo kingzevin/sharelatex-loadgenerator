@@ -141,6 +141,10 @@ def compile(l):
     l.client.get(pdfUrl,
             params={ "compileGroup": "standard", "pdfng": True},
             name="/project/[id]/output/output.pdf")
+    # clear_cache
+    # if random.random() < 0.1:
+        # clear_cache(l)
+    clear_cache(l)
 
 def clear_cache(l):
     l.client.delete("/project/%s/output" % l.project_id)
@@ -155,7 +159,7 @@ def find_user_id(doc):
     return user.group(1)
 
 class Page(TaskSet): # 怎么执行到这的
-    tasks = { stop: 1, chat: 2, edit_document: 5, file_upload: 1, show_history: 1, compile: 2, share_project: 1, clear_cache:1}
+    tasks = { stop: 1, chat: 2, edit_document: 5, file_upload: 1, show_history: 1, compile: 2, share_project: 1, clear_cache:0}
     def on_start(self):
         # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
         projects = self.parent.projects
