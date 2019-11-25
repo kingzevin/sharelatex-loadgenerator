@@ -82,4 +82,5 @@ export LOCUST_STATSD_HOST=172.17.0.7 \
     # LOCUST_INFLUXDB_USER="influxdb" \
     # LOCUST_INFLUXDB_PASSWORD="rewtrewt" \
     LOCUST_INFLUXDB_DB="metrics"
+export SPECIFIC_TASK="IndexTask"
 locust -H http://localhost:8000
