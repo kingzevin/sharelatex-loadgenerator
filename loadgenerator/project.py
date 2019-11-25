@@ -9,8 +9,8 @@ import uuid
 import json
 from . import ROOT_PATH, csrf, randomwords
 from locust import TaskSet, task
-sys.path.append("..") # 这句是为了导入_config
-from locustfile import SPECIFIC_TASK
+# sys.path.append("..") # 这句是为了导入_config
+# from locustfile import locustfile.SPECIFIC_TASK
 ## zevin
 from inspect import currentframe, getframeinfo
 def LINE():
@@ -156,6 +156,7 @@ def find_user_id(doc):
     return user.group(1)
 
 class Page(TaskSet): # 怎么执行到这的
+    SPECIFIC_TASK = self.parent.SPECIFIC_TASK
     if SPECIFIC_TASK == "CompileTask":
         tasks = {compile: 1}
     elif SPECIFIC_TASK == "ChatTask":
