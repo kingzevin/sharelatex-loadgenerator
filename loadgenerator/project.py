@@ -147,7 +147,7 @@ def compile(l):
     clear_cache(l)
 
 def clear_cache(l):
-    l.client.delete("/project/%s/output" % l.project_id)
+    l.client.delete("/project/%s/output" % l.project_id,params = {"_csrf": l.csrf_token},)
 
 def find_user_id(doc):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
