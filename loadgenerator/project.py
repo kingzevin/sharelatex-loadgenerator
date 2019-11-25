@@ -193,4 +193,4 @@ class Show_HistoryTask(Page):
 class Share_ProjectTask(Page):
     tasks = {share_project: 1}
 class Clear_CacheTask(Page):
-    tasks = {clear_cache:0.1}
+    tasks = {clear_cache:1}
