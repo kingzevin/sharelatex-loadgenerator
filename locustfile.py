@@ -127,6 +127,9 @@ class ProjectOverview(TaskSet): # 怎么执行到这的
             tasks = {settings: 1}
         elif SPECIFIC_TASK == "Create_DeleteTask":
             tasks = {create_delete_project: 1}
+        else:
+            print_color("error task!")
+            exit(-3)
     else:
         tasks = { project.Page: 30, create_delete_project: 2, stop: 1, settings: 1 }
     def on_start(self):
