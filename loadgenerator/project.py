@@ -7,7 +7,7 @@ import re
 import string
 import uuid
 import json
-from . import ROOT_PATH, csrf, randomwords
+from . import ROOT_PATH, csrf, randomwords, SPECIFIC_TASK
 from locust import TaskSet, task
 
 ## zevin
@@ -98,7 +98,7 @@ def share_project(l):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
     l.client.get("/user/contacts")
     p = dict(_csrf=l.csrf_token, email="joerg.2@higgsboson.tk", privileges="readAndWrite")
-    l.client.post("/project/%s/invite" % l.project_id, data=p, name="/project/[id]/users")
+    l.client.post("/project/%s/invite" % l.project_id, data=p, name="/project/[id]/invite")
 
 def spell_check(l, toCheck):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
@@ -155,7 +155,22 @@ def find_user_id(doc):
     return user.group(1)
 
 class Page(TaskSet): # 怎么执行到这的
-    tasks = { stop: 1, chat: 2, edit_document: 5, file_upload: 1, show_history: 1, compile: 2, share_project: 1, clear_cache:1}
+    if SPECIFIC_TASK == "CompileTask":
+        tasks = {compile: 1}
+    elif SPECIFIC_TASK == "ChatTask":
+        tasks = {chat: 1}
+    elif SPECIFIC_TASK == "Edit_DocumentTask":
+        tasks = {edit_document: 1}
+    elif SPECIFIC_TASK == "File_UploadTask":
+        tasks = {file_upload: 1}
+    elif SPECIFIC_TASK == "Show_HistoryTask":
+        tasks = {show_history: 1}
+    elif SPECIFIC_TASK == "Share_ProjectTask":
+        tasks = {share_project: 1}
+    elif SPECIFIC_TASK == "Clear_CacheTask":
+        tasks = {clear_cache: 1}
+    else:
+        tasks = { stop: 1, chat: 2, edit_document: 5, file_upload: 1, show_history: 1, compile: 2, share_project: 1, clear_cache:1}
     def on_start(self):
         # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
         projects = self.parent.projects
@@ -179,18 +194,3 @@ class Page(TaskSet): # 怎么执行到这的
         # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
         self.websocket.close()
         super(Page, self).interrupt(reschedule=reschedule)
-
-class CompileTask(Page):
-    tasks = {compile: 1}
-class ChatTask(Page):
-    tasks = {chat: 2}
-class Edit_DocumentTask(Page):
-    tasks = {edit_document: 5}
-class File_UploadTask(Page):
-    tasks = {file_upload: 1}
-class Show_HistoryTask(Page):
-    tasks = {show_history: 1}
-class Share_ProjectTask(Page):
-    tasks = {share_project: 1}
-class Clear_CacheTask(Page):
-    tasks = {clear_cache:1}

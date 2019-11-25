@@ -104,19 +104,19 @@ def index(l):
 class ProjectOverview(TaskSet): # 怎么执行到这的
     if SPECIFIC_TASK != "":
         if SPECIFIC_TASK == "CompileTask":
-            tasks = {project.CompileTask: 1}
+            tasks = {project.Page}
         elif SPECIFIC_TASK == "ChatTask":
-            tasks = {project.ChatTask: 1}
+            tasks = {project.Page}
         elif SPECIFIC_TASK == "Edit_DocumentTask":
-            tasks = {project.Edit_DocumentTask: 1}
+            tasks = {project.Page}
         elif SPECIFIC_TASK == "File_UploadTask":
-            tasks = {project.File_UploadTask: 1}
+            tasks = {project.Page}
         elif SPECIFIC_TASK == "Show_HistoryTask":
-            tasks = {project.Show_HistoryTask: 1}
+            tasks = {project.Page}
         elif SPECIFIC_TASK == "Share_ProjectTask":
-            tasks = {project.Share_ProjectTask: 1}
+            tasks = {project.Page}
         elif SPECIFIC_TASK == "Clear_CacheTask":
-            tasks = {project.Clear_CacheTask: 1}
+            tasks = {project.Page}
         elif SPECIFIC_TASK == "RegisterTask":
             tasks = {register: 1}
         elif SPECIFIC_TASK == "Password_ResetTask":
@@ -168,6 +168,7 @@ class WebsiteUser(HttpLocust):
             self.client_queue = queue
             super(WebsiteUser, self).__init__()
     task_set = UserBehavior
+    self.SPECIFIC_TASK = SPECIFIC_TASK
     # task_set_instance = self.task_set(WebsiteUser)
     # task_set_instance = UserBehavior(WebsiteUser)
     
