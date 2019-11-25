@@ -42,6 +42,7 @@ print "LINE:" + str(getframeinfo(currentframe()).filename) + ":" + str(getframei
 USERS                   = int(os.environ.get("LOCUST_USERS", '2'))
 HATCH_RATE              = float(os.environ.get("LOCUST_HATCH_RATE", "1"))
 LOAD_TYPE               = os.environ.get("LOCUST_LOAD_TYPE", "constant") # linear, constant, random, nasa, worldcup
+SPECIFIC_TASK               = os.environ.get("SPECIFIC_TASK", "") # linear, constant, random, nasa, worldcup
 print "LINE:" + str(getframeinfo(currentframe()).filename) + ":" + str(getframeinfo(currentframe()).lineno) + "," + str(LOAD_TYPE)
 SPAWN_WAIT_MEAN         = int(os.environ.get("LOCUST_SPAWN_WAIT_MEAN", "10"))
 SPAWN_WAIT_STD          = int(os.environ.get("LOCUST_SPAWN_WAIT_STD", "4"))
@@ -92,6 +93,10 @@ def register(l):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
     l.client.get("/register")
 
+def password_reset(l):
+    l.client.get("/user/password/reset")
+    l.client.post("/user/password/reset", params={"_csrf":l.csrf_token, "email":"user1@higgsboson.tk"}, name="/user/password/reset")
+
 def index(l):
     # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno) + str(traceback.format_stack())
     l.client.get("/")
@@ -104,7 +109,32 @@ class ProjectOverview(TaskSet): # 怎么执行到这的
         projects = re.search("\"projects\":(\\[[^\\]]*\\])", r.content.decode("utf-8") , re.MULTILINE)
         projects = re.search("\"projects\":(\\[[^\\]]*\\])", r.content.decode("utf-8") , re.MULTILINE).group(1)
         self.projects = json.loads(projects)
-	self.projects = [x for x in self.projects if x["archived"] == False]
+        if SPECIFIC_TASK != "":
+            if SPECIFIC_TASK == "CompileTask":
+                tasks = {project.CompileTask: 1}
+            elif SPECIFIC_TASK == "ChatTask":
+                tasks = {project.ChatTask: 1}
+            elif SPECIFIC_TASK == "Edit_DocumentTask":
+                tasks = {project.Edit_DocumentTask: 1}
+            elif SPECIFIC_TASK == "File_UploadTask":
+                tasks = {project.File_UploadTask: 1}
+            elif SPECIFIC_TASK == "Show_HistoryTask":
+                tasks = {project.Show_HistoryTask: 1}
+            elif SPECIFIC_TASK == "Share_ProjectTask":
+                tasks = {project.Share_ProjectTask: 1}
+            elif SPECIFIC_TASK == "Clear_CacheTask":
+                tasks = {project.Clear_CacheTask: 1}
+            elif SPECIFIC_TASK == "RegisterTask":
+                tasks = {register: 1}
+            elif SPECIFIC_TASK == "Password_ResetTask":
+                tasks = {password_reset: 1}
+            elif SPECIFIC_TASK == "IndexTask":
+                tasks = {index: 1}
+            elif SPECIFIC_TASK == "SettingsTask":
+                tasks = {settings: 1}
+            elif SPECIFIC_TASK == "Create_DeleteTask":
+                tasks = {create_delete_project: 1}
+	    self.projects = [x for x in self.projects if x["archived"] == False]
         assert len(self.projects) > 0, "No project founds create some!"
         self.csrf_token = csrf.find_in_page(r.content)
 
@@ -120,7 +150,8 @@ class UserBehavior(TaskSet): # parent = WebsiteUser
         self.email = "user%d@higgsboson.tk" % (int(user) % 300)
         print "LINE:" + str(getframeinfo(currentframe()).filename) + ":" + str(getframeinfo(currentframe()).lineno) + "," + str(self.email)
         login(self)
-
+        if SPECIFIC_TASK != "":
+            tasks = {ProjectOverview: 1}
 class WebsiteUser(HttpLocust):
     if LOAD_TYPE == "nasa" or LOAD_TYPE == "worldcup":
         def __init__(self, client_id, timestamps, queue):

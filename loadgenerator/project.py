@@ -179,3 +179,18 @@ class Page(TaskSet): # 怎么执行到这的
         # print "Enter:" + str(getframeinfo(currentframe()).filename + ":" + getframeinfo(currentframe()).function) + "-LINE:" + str(getframeinfo(currentframe()).lineno)
         self.websocket.close()
         super(Page, self).interrupt(reschedule=reschedule)
+
+class CompileTask(Page):
+    tasks = {compile: 1}
+class ChatTask(Page):
+    tasks = {chat: 2}
+class Edit_DocumentTask(Page):
+    tasks = {edit_document: 5}
+class File_UploadTask(Page):
+    tasks = {file_upload: 1}
+class Show_HistoryTask(Page):
+    tasks = {show_history: 1}
+class Share_ProjectTask(Page):
+    tasks = {share_project: 1}
+class Clear_CacheTask(Page):
+    tasks = {clear_cache:0.1}
